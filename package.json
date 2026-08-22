@@ -1,0 +1,46 @@
+{
+  "name": "nexus-csi-sensor",
+  "version": "1.0.0",
+  "description": "WiFi Channel State Information presence and motion sensor firmware for ESP32. No camera, no microphone — just radio waves and math.",
+  "main": "index.js",
+  "keywords": [
+    "esp32",
+    "wifi",
+    "csi",
+    "channel-state-information",
+    "presence-detection",
+    "motion-detection",
+    "iot",
+    "freertos",
+    "esp-idf",
+    "privacy",
+    "home-automation",
+    "sensing"
+  ],
+  "author": "Pangerkumzuk Longkumer <pangerlkr@github>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pangerlkr/NEXUS-CSI-Sensor.git"
+  },
+  "homepage": "https://pangerlkr.github.io/NEXUS-CSI-Sensor",
+  "bugs": {
+    "url": "https://github.com/pangerlkr/NEXUS-CSI-Sensor/issues"
+  },
+  "scripts": {
+    "build:web": "echo 'Web assets are embedded into firmware — see web/ directory'",
+    "test": "cd tests/host && make && make test",
+    "docs": "echo 'Documentation lives in docs/ — open docs/index.html for the GitHub Pages site'"
+  },
+  "files": [
+    "firmware/",
+    "hardware/",
+    "web/",
+    "docs/",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
+}

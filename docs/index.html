@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="NEXUS CSI Sensor — WiFi-based presence and motion detection using ESP32 Channel State Information. No camera, no microphone, just radio waves.">
+  <meta property="og:title" content="NEXUS CSI Sensor">
+  <meta property="og:description" content="See presence and motion in a room using only WiFi. No camera. No microphone. No infrared. Just radio waves and math.">
+  <meta property="og:type" content="website">
+  <title>NEXUS CSI Sensor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@300..700&display=swap" rel="stylesheet">
+  <style>
+    :root, [data-theme="dark"] {
+      --color-bg: #0d0f0e;
+      --color-surface: #111413;
+      --color-surface-2: #161918;
+      --color-surface-offset: #1a1d1c;
+      --color-border: #252928;
+      --color-divider: #1e2120;
+      --color-text: #d4d8d5;
+      --color-text-muted: #7a8480;
+      --color-text-faint: #3d4542;
+      --color-primary: #00c896;
+      --color-primary-dim: #008f6a;
+      --color-primary-glow: rgba(0,200,150,0.12);
+      --color-primary-highlight: #001a12;
+      --color-accent: #00e5b4;
+      --color-warning: #f0a020;
+      --color-error: #e05050;
+      --font-display: "JetBrains Mono", monospace;
+      --font-body: "Inter", sans-serif;
+      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+      --text-2xl: clamp(2rem, 1.2rem + 2.5vw, 3.5rem);
+      --text-hero: clamp(2.5rem, 0.5rem + 6vw, 5.5rem);
+      --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem;
+      --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem;
+      --space-12: 3rem; --space-16: 4rem; --space-20: 5rem; --space-24: 6rem;
+      --radius-sm: 0.375rem; --radius-md: 0.5rem; --radius-lg: 0.75rem;
+      --radius-xl: 1rem; --radius-full: 9999px;
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.5);
+      --content-default: 960px; --content-wide: 1200px;
+      --transition: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+    body { min-height: 100dvh; font-family: var(--font-body); font-size: var(--text-base); color: var(--color-text); background: var(--color-bg); line-height: 1.6; overflow-x: hidden; }
+    img, svg { display: block; max-width: 100%; }
+    a { color: var(--color-primary); text-decoration: none; transition: color var(--transition); }
+    a:hover { color: var(--color-accent); }
+    h1,h2,h3,h4 { font-family: var(--font-display); text-wrap: balance; line-height: 1.1; }
+    p, li { text-wrap: pretty; }
+    button { cursor: pointer; background: none; border: none; font: inherit; color: inherit; }
+    .container { max-width: var(--content-default); margin-inline: auto; padding-inline: var(--space-6); }
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(13,15,14,0.85); backdrop-filter: blur(16px); border-bottom: 1px solid var(--color-divider); padding: var(--space-4) 0; }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); }
+    .nav-logo { display: flex; align-items: center; gap: var(--space-3); font-family: var(--font-display); font-size: var(--text-sm); font-weight: 600; color: var(--color-text); letter-spacing: 0.02em; }
+    .nav-links { display: flex; align-items: center; gap: var(--space-6); font-size: var(--text-sm); }
+    .nav-links a { color: var(--color-text-muted); transition: color var(--transition); }
+    .nav-links a:hover { color: var(--color-text); }
+    .btn-nav { padding: var(--space-2) var(--space-4); border: 1px solid var(--color-primary-dim); border-radius: var(--radius-full); color: var(--color-primary) !important; font-size: var(--text-sm); transition: all var(--transition); }
+    .btn-nav:hover { background: var(--color-primary-glow); border-color: var(--color-primary); }
+    .hero { position: relative; overflow: hidden; padding: clamp(var(--space-20), 12vw, var(--space-24)) 0 clamp(var(--space-16), 8vw, var(--space-20)); }
+    .hero-bg { position: absolute; inset: 0; z-index: 0; background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(0,200,150,0.08) 0%, transparent 70%), radial-gradient(ellipse 40% 40% at 20% 80%, rgba(0,200,150,0.04) 0%, transparent 60%); }
+    .hero-grid { position: absolute; inset: 0; z-index: 0; opacity: 0.04; background-image: linear-gradient(var(--color-primary) 1px, transparent 1px), linear-gradient(90deg, var(--color-primary) 1px, transparent 1px); background-size: 40px 40px; }
+    .hero-content { position: relative; z-index: 1; text-align: center; }
+    .hero-badge { display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-1) var(--space-3); border-radius: var(--radius-full); border: 1px solid var(--color-primary-dim); background: var(--color-primary-highlight); font-size: var(--text-xs); color: var(--color-primary); font-family: var(--font-display); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: var(--space-6); }
+    .hero-badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--color-primary); animation: pulse 2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.4)} }
+    .hero h1 { font-size: var(--text-hero); color: var(--color-text); margin-bottom: var(--space-5); letter-spacing: -0.02em; }
+    .hero h1 span { color: var(--color-primary); }
+    .hero-sub { font-size: var(--text-lg); color: var(--color-text-muted); max-width: 60ch; margin: 0 auto var(--space-10); }
+    .hero-actions { display: flex; align-items: center; justify-content: center; gap: var(--space-4); flex-wrap: wrap; }
+    .btn-primary { display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-3) var(--space-6); border-radius: var(--radius-full); background: var(--color-primary); color: #000; font-weight: 600; font-size: var(--text-sm); transition: all var(--transition); }
+    .btn-primary:hover { background: var(--color-accent); color: #000; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,200,150,0.3); }
+    .btn-secondary { display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-3) var(--space-6); border-radius: var(--radius-full); border: 1px solid var(--color-border); color: var(--color-text); font-size: var(--text-sm); transition: all var(--transition); }
+    .btn-secondary:hover { border-color: var(--color-text-muted); background: var(--color-surface); color: var(--color-text); }
+    .hero-stats { display: flex; justify-content: center; gap: var(--space-10); margin-top: var(--space-16); padding-top: var(--space-10); border-top: 1px solid var(--color-divider); flex-wrap: wrap; }
+    .stat { text-align: center; }
+    .stat-val { font-family: var(--font-display); font-size: var(--text-xl); color: var(--color-primary); font-weight: 600; }
+    .stat-label { font-size: var(--text-xs); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: var(--space-1); }
+    section { padding: clamp(var(--space-12), 8vw, var(--space-20)) 0; }
+    .section-label { font-family: var(--font-display); font-size: var(--text-xs); color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: var(--space-3); }
+    .section-title { font-size: var(--text-xl); color: var(--color-text); margin-bottom: var(--space-4); }
+    .section-body { font-size: var(--text-base); color: var(--color-text-muted); max-width: 60ch; }
+    .pipeline { display: grid; gap: var(--space-4); margin-top: var(--space-10); }
+    .pipeline-step { display: grid; grid-template-columns: 40px 1fr; gap: var(--space-4); align-items: start; padding: var(--space-5); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); transition: border-color var(--transition); }
+    .pipeline-step:hover { border-color: var(--color-primary-dim); }
+    .step-num { font-family: var(--font-display); font-size: var(--text-sm); color: var(--color-primary); font-weight: 600; padding-top: 2px; }
+    .step-content h4 { font-family: var(--font-display); font-size: var(--text-sm); color: var(--color-text); font-weight: 600; margin-bottom: var(--space-1); }
+    .step-content p { font-size: var(--text-sm); color: var(--color-text-muted); }
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(280px,100%), 1fr)); gap: var(--space-4); margin-top: var(--space-10); }
+    .feature-card { padding: var(--space-6); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); transition: all var(--transition); }
+    .feature-card:hover { border-color: var(--color-primary-dim); background: var(--color-surface-2); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .feature-icon { width: 36px; height: 36px; color: var(--color-primary); margin-bottom: var(--space-4); }
+    .feature-card h3 { font-family: var(--font-display); font-size: var(--text-sm); color: var(--color-text); font-weight: 600; margin-bottom: var(--space-2); }
+    .feature-card p { font-size: var(--text-sm); color: var(--color-text-muted); }
+    .security-section { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--space-8); margin-top: var(--space-10); overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+    th { font-family: var(--font-display); font-size: var(--text-xs); color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.08em; text-align: left; padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--color-divider); font-weight: 600; }
+    td { padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--color-divider); color: var(--color-text-muted); vertical-align: top; }
+    td:first-child { color: var(--color-text); font-weight: 500; font-family: var(--font-display); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--color-surface-2); }
+    .quickstart { display: grid; gap: var(--space-6); margin-top: var(--space-10); }
+    .qs-step { display: flex; gap: var(--space-5); padding: var(--space-6); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); }
+    .qs-num { flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%; background: var(--color-primary-glow); border: 1px solid var(--color-primary-dim); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: var(--text-sm); color: var(--color-primary); font-weight: 600; }
+    .qs-step h4 { font-family: var(--font-display); font-size: var(--text-sm); color: var(--color-text); margin-bottom: var(--space-1); }
+    .qs-step p { font-size: var(--text-sm); color: var(--color-text-muted); }
+    code { font-family: var(--font-display); font-size: 0.9em; background: var(--color-surface-offset); padding: 0.1em 0.4em; border-radius: var(--radius-sm); color: var(--color-primary); }
+    .code-block { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-5); font-family: var(--font-display); font-size: var(--text-sm); color: var(--color-text-muted); margin-top: var(--space-4); overflow-x: auto; line-height: 1.8; }
+    .code-block .prompt { color: var(--color-primary); user-select: none; }
+    .cta-banner { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-xl); padding: clamp(var(--space-10), 6vw, var(--space-16)); text-align: center; position: relative; overflow: hidden; }
+    .cta-banner::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse 60% 80% at 50% 50%, rgba(0,200,150,0.06) 0%, transparent 70%); pointer-events: none; }
+    .cta-banner h2 { font-size: var(--text-xl); color: var(--color-text); margin-bottom: var(--space-4); position: relative; }
+    .cta-banner p { font-size: var(--text-base); color: var(--color-text-muted); max-width: 52ch; margin: 0 auto var(--space-8); position: relative; }
+    .cta-actions { display: flex; gap: var(--space-4); justify-content: center; flex-wrap: wrap; position: relative; }
+    footer { border-top: 1px solid var(--color-divider); padding: var(--space-10) 0; margin-top: var(--space-8); }
+    .footer-inner { display: flex; align-items: center; justify-content: space-between; gap: var(--space-6); flex-wrap: wrap; }
+    .footer-text { font-size: var(--text-xs); color: var(--color-text-faint); }
+    .footer-links { display: flex; gap: var(--space-5); }
+    .footer-links a { font-size: var(--text-xs); color: var(--color-text-muted); }
+    .footer-links a:hover { color: var(--color-text); }
+    @media (max-width: 640px) { .nav-links { display: none; } .hero-stats { gap: var(--space-6); } }
+    @media (min-width: 768px) { .pipeline { grid-template-columns: 1fr 1fr; } }
+    .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .reveal.visible { opacity: 1; transform: none; }
+    @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; } }
+  </style>
+</head>
+<body>
+<a href="#main" style="position:absolute;left:-9999px;top:1rem;padding:0.5rem 1rem;background:var(--color-primary);color:#000;border-radius:var(--radius-md);font-size:var(--text-sm);z-index:999">Skip to content</a>
+<nav>
+  <div class="container">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo" aria-label="NEXUS CSI Sensor Home">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true"><rect x="1" y="1" width="26" height="26" rx="5" stroke="#00c896" stroke-width="1.5"/><circle cx="14" cy="14" r="5" stroke="#00c896" stroke-width="1.5"/><circle cx="14" cy="14" r="2" fill="#00c896"/><line x1="14" y1="1" x2="14" y2="8" stroke="#00c896" stroke-width="1.5"/><line x1="14" y1="20" x2="14" y2="27" stroke="#00c896" stroke-width="1.5"/><line x1="1" y1="14" x2="8" y2="14" stroke="#00c896" stroke-width="1.5"/><line x1="20" y1="14" x2="27" y2="14" stroke="#00c896" stroke-width="1.5"/></svg>
+        NEXUS CSI
+      </a>
+      <div class="nav-links">
+        <a href="#how-it-works">How it Works</a>
+        <a href="#features">Features</a>
+        <a href="#security">Security</a>
+        <a href="#quickstart">Quickstart</a>
+        <a href="https://github.com/pangerlkr/NEXUS-CSI-Sensor/wiki" target="_blank" rel="noopener noreferrer">Wiki</a>
+        <a href="https://github.com/pangerlkr/NEXUS-CSI-Sensor" target="_blank" rel="noopener noreferrer" class="btn-nav">GitHub ↗</a>
+      </div>
+    </div>
+  </div>
+</nav>
+<main id="main">
+  <section class="hero">
+    <div class="hero-bg" aria-hidden="true"></div>
+    <div class="hero-grid" aria-hidden="true"></div>
+    <div class="container hero-content">
+      <div class="hero-badge">v1.0.0 — Initial Release</div>
+      <h1>NEXUS <span>CSI</span> Sensor</h1>
+      <p class="hero-sub">See presence and motion in a room using only WiFi. No camera. No microphone. No infrared. Just radio waves and math.</p>
+      <div class="hero-actions">
+        <a href="https://github.com/pangerlkr/NEXUS-CSI-Sensor/releases/latest" target="_blank" rel="noopener noreferrer" class="btn-primary">⬇ Download v1.0.0</a>
+        <a href="https://github.com/pangerlkr/NEXUS-CSI-Sensor" target="_blank" rel="noopener noreferrer" class="btn-secondary">GitHub</a>
+        <a href="https://github.com/pangerlkr/NEXUS-CSI-Sensor/wiki" target="_blank" rel="noopener noreferrer" class="btn-secondary">📖 Docs</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><div class="stat-val">ESP32</div><div class="stat-label">Platform</div></div>
+        <div class="stat"><div class="stat-val">~$5</div><div class="stat-label">Hardware Cost</div></div>
+        <div class="stat"><div class="stat-val">4</div><div class="stat-label">Activity Levels</div></div>
+        <div class="stat"><div class="stat-val">MIT</div><div class="stat-label">License</div></div>
+        <div class="stat"><div class="stat-val">0</div><div class="stat-label">Cameras Used</div></div>
+      </div>
+    </div>
+  </section>
+  <section id="how-it-works">
+    <div class="container">
+      <div class="reveal"><p class="section-label">Signal Pipeline</p><h2 class="section-title">How NEXUS sees the room</h2><p class="section-body">Every WiFi packet crossing a room carries a fingerprint of the space it traversed. NEXUS reads that fingerprint and translates its changes into presence and motion.</p></div>
+      <div class="pipeline reveal">
+        <div class="pipeline-step"><span class="step-num">01</span><div class="step-content"><h4>Packet Capture</h4><p>The ESP32 promiscuously captures passing 802.11 frames and extracts their Channel State Information (CSI) payload.</p></div></div>
+        <div class="pipeline-step"><span class="step-num">02</span><div class="step-content"><h4>Amplitude Extraction</h4><p>Magnitude is computed across all subcarrier amplitudes. A heartbeat of pings ensures packet rate stays high enough.</p></div></div>
+        <div class="pipeline-step"><span class="step-num">03</span><div class="step-content"><h4>Baseline Learning</h4><p>Builds a running average of the empty-room signature. Freezes immediately when motion is detected.</p></div></div>
+        <div class="pipeline-step"><span class="step-num">04</span><div class="step-content"><h4>State Classification</h4><p>Deviation from baseline is bucketed into four states: Idle, Presence, Motion, High Motion.</p></div></div>
+      </div>
+    </div>
+  </section>
+  <section id="features" style="background:var(--color-surface);border-top:1px solid var(--color-divider);border-bottom:1px solid var(--color-divider)">
+    <div class="container">
+      <div class="reveal"><p class="section-label">Capabilities</p><h2 class="section-title">Everything included, nothing extraneous</h2></div>
+      <div class="features-grid reveal">
+        <div class="feature-card"><svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><h3>Privacy First</h3><p>No camera, no microphone, no image ever captured. Presence inferred from radio energy only.</p></div>
+        <div class="feature-card"><svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg><h3>Live Web Dashboard</h3><p>Dark cybersecurity-styled UI served from the device. WebSocket updates, activity charts, CSV export.</p></div>
+        <div class="feature-card"><svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22C6.5 22 2 17.5 2 12S6.5 2 12 2s10 4.5 10 10-4.5 10-10 10z"/><path d="M12 8v4l3 3"/></svg><h3>Adaptive Baseline</h3><p>Learns your room on startup. Adapts slowly to drift. Freezes learning instantly when motion is detected.</p></div>
+        <div class="feature-card"><svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><h3>4-Level Detection</h3><p>Idle → Presence → Motion → High Motion, each with independently tunable thresholds.</p></div>
+        <div class="feature-card"><svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg><h3>OTA Firmware Updates</h3><p>Flash new firmware from the dashboard. Verified before boot, with automatic rollback on failure.</p></div>
+        <div class="feature-card"><svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32"/></svg><h3>AP Fallback</h3><p>Can't reach WiFi? Device hosts its own NEXUS-CSI-Setup network so you're never locked out.</p></div>
+        <div class="feature-card"><svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg><h3>Optional Display</h3><p>1.8" ST7735 color screen for on-device status: state, motion score, signal quality, IP address.</p></div>
+        <div class="feature-card"><svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg><h3>Self-Healing</h3><p>FreeRTOS watchdog reboots automatically if any task stalls. Designed for months of unattended operation.</p></div>
+      </div>
+    </div>
+  </section>
+  <section id="security">
+    <div class="container">
+      <div class="reveal"><p class="section-label">Defence in Depth</p><h2 class="section-title">Security isn't an afterthought</h2><p class="section-body">Every layer was hardened before the first commit.</p></div>
+      <div class="security-section reveal">
+        <table><thead><tr><th>Layer</th><th>What it does</th><th>Why it matters</th></tr></thead><tbody>
+          <tr><td>Login required</td><td>Dashboard gated by username + password</td><td>Nobody can read presence data by guessing the IP</td></tr>
+          <tr><td>Hashed passwords</td><td>Salted SHA-256, never plaintext</td><td>Physical flash access doesn't expose credentials</td></tr>
+          <tr><td>Constant-time checks</td><td>Comparison time is input-independent</td><td>Timing attacks are closed</td></tr>
+          <tr><td>Session cookies</td><td>HttpOnly, SameSite=Strict, 1h expiry</td><td>JS can't steal tokens; cross-site riding blocked</td></tr>
+          <tr><td>CSRF tokens</td><td>Every mutating action requires a valid token</td><td>Malicious pages can't reboot your sensor</td></tr>
+          <tr><td>Login rate limiting</td><td>Too many failures → 2-min lockout</td><td>Brute force becomes impractical</td></tr>
+          <tr><td>Verified OTA + rollback</td><td>Firmware checked before boot; reverts on crash</td><td>Failed updates cannot brick the device</td></tr>
+          <tr><td>Hardening headers</td><td>nosniff + anti-framing on every response</td><td>Mitigates content-sniffing and clickjacking</td></tr>
+        </tbody></table>
+      </div>
+      <p style="margin-top:var(--space-5);font-size:var(--text-sm);color:var(--color-text-muted);padding:var(--space-4);background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg)">⚠️ <strong style="color:var(--color-warning)">First thing:</strong> Change the default <code>admin</code> / <code>nexus-admin</code> credentials immediately after first login.</p>
+    </div>
+  </section>
+  <section id="quickstart" style="background:var(--color-surface);border-top:1px solid var(--color-divider);border-bottom:1px solid var(--color-divider)">
+    <div class="container">
+      <div class="reveal"><p class="section-label">Get Running</p><h2 class="section-title">Three steps to a live sensor</h2><p class="section-body">You need an ESP32 and a USB data cable. That's the real minimum.</p></div>
+      <div class="quickstart reveal">
+        <div class="qs-step"><div class="qs-num">1</div><div><h4>Flash the firmware</h4><p>Download the prebuilt binary from the latest release, or build from source with ESP-IDF v5.x. Full instructions in <a href="https://github.com/pangerlkr/NEXUS-CSI-Sensor/blob/main/docs/FLASHING.md" target="_blank" rel="noopener noreferrer">docs/FLASHING.md</a>.</p><div class="code-block"><span class="prompt">$ </span>esptool.py --port /dev/ttyUSB0 --baud 460800 write_flash 0x0 nexus-csi-v1.0.0.bin</div></div></div>
+        <div class="qs-step"><div class="qs-num">2</div><div><h4>Connect to your WiFi</h4><p>On first boot the device hosts <code>NEXUS-CSI-Setup</code>. Join it from your phone and enter your WiFi credentials. See <a href="https://github.com/pangerlkr/NEXUS-CSI-Sensor/blob/main/docs/USAGE.md" target="_blank" rel="noopener noreferrer">docs/USAGE.md</a>.</p></div></div>
+        <div class="qs-step"><div class="qs-num">3</div><div><h4>Dashboard & calibrate</h4><p>Navigate to the device IP, log in, change the default password, and run room calibration. See <a href="https://github.com/pangerlkr/NEXUS-CSI-Sensor/blob/main/docs/CALIBRATION.md" target="_blank" rel="noopener noreferrer">docs/CALIBRATION.md</a>.</p></div></div>
+      </div>
+    </div>
+  </section>
+  <section><div class="container"><div class="cta-banner reveal"><h2>Built for makers who understand their tools</h2><p>Full source, thorough docs, MIT licensed. Use it, learn from it, ship it.</p><div class="cta-actions"><a href="https://github.com/pangerlkr/NEXUS-CSI-Sensor" target="_blank" rel="noopener noreferrer" class="btn-primary">View on GitHub</a><a href="https://github.com/pangerlkr/NEXUS-CSI-Sensor/wiki" target="_blank" rel="noopener noreferrer" class="btn-secondary">Read the Wiki</a><a href="https://github.com/pangerlkr/NEXUS-CSI-Sensor/releases" target="_blank" rel="noopener noreferrer" class="btn-secondary">All Releases</a></div></div></div></section>
+</main>
+<footer><div class="container"><div class="footer-inner"><p class="footer-text">NEXUS CSI Sensor — MIT License — by <a href="https://github.com/pangerlkr" target="_blank" rel="noopener noreferrer" style="color:var(--color-text-muted)">pangerlkr</a></p><div class="footer-links"><a href="https://github.com/pangerlkr/NEXUS-CSI-Sensor" target="_blank" rel="noopener noreferrer">GitHub</a><a href="https://github.com/pangerlkr/NEXUS-CSI-Sensor/wiki" target="_blank" rel="noopener noreferrer">Wiki</a><a href="https://github.com/pangerlkr/NEXUS-CSI-Sensor/releases" target="_blank" rel="noopener noreferrer">Releases</a><a href="https://github.com/pangerlkr/NEXUS-CSI-Sensor/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">License</a></div></div></div></footer>
+<script>const o=new IntersectionObserver(e=>{e.forEach(n=>{if(n.isIntersecting){n.target.classList.add('visible');o.unobserve(n.target)}})},{threshold:0.1,rootMargin:'0px 0px -40px 0px'});document.querySelectorAll('.reveal').forEach(el=>o.observe(el));</script>
+</body></html>

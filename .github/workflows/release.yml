@@ -1,0 +1,41 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get tag info
+        id: tag
+        run: echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Package firmware source
+        run: |
+          zip -r nexus-csi-firmware-${{ steps.tag.outputs.TAG }}.zip \
+            firmware/ hardware/ docs/ web/ \
+            README.md LICENSE CONTRIBUTING.md CODE_OF_CONDUCT.md SECURITY.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.TAG }}
+          name: NEXUS CSI Sensor ${{ steps.tag.outputs.TAG }}
+          body_path: releases/CHANGELOG.md
+          draft: false
+          prerelease: false
+          files: |
+            nexus-csi-firmware-${{ steps.tag.outputs.TAG }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
