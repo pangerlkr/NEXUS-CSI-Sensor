@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#070b16" />
+  <title>NEXUS CSI Sensor</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <!-- Chart.js is used when reachable; app.js falls back to a built-in
+       canvas renderer when offline (e.g. in soft-AP mode). -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="app">
+    <!-- ================= Sidebar ================= -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="logo">N</div>
+        <div class="name">NEXUS<small>CSI SENSOR</small></div>
+      </div>
+
+      <nav class="nav" id="nav">
+        <button data-view="dashboard" class="active"><span class="ic">◈</span> Dashboard</button>
+        <button data-view="logs"><span class="ic">≡</span> Event Log</button>
+        <button data-view="settings"><span class="ic">⚙</span> Settings</button>
+        <button data-view="system"><span class="ic">⟳</span> System &amp; OTA</button>
+      </nav>
+
+      <div class="spacer"></div>
+      <button class="btn ghost" id="logoutBtn" style="width:100%; margin-bottom:14px;">Sign out</button>
+      <div class="side-foot">
+        <div id="footDevice">nexus-csi</div>
+        <div>firmware v<span id="footFw">-</span></div>
+      </div>
+    </aside>
+
+    <!-- ================= Main ================= -->
+    <div class="main">
+      <header class="topbar">
+        <button class="hamburger" id="hamburger" aria-label="Menu">☰</button>
+        <div>
+          <h1 id="pageTitle">Dashboard</h1>
+          <div class="sub" id="deviceSub">-</div>
+        </div>
+        <div class="right">
+          <div class="conn"><span class="dot" id="connDot"></span><span id="connText">connecting…</span></div>
+          <div class="conn"><span class="ic">⏱</span><span id="uptimeTop" class="mono">-</span></div>
+        </div>
+      </header>
+
+      <div class="content">
+
+        <!-- ===== Dashboard view ===== -->
+        <section class="view active" id="view-dashboard">
+          <div class="hero glass">
+            <div class="state-badge" id="stateBadge">
+              <div class="ring s-idle" id="stateRing">◎</div>
+              <div class="big s-idle" id="stateText">IDLE</div>
+              <div class="sub" style="color:var(--text-faint); font-size:12px;">for <span id="stateSince">0s</span></div>
+            </div>
+            <div class="metrics">
+              <div class="metric"><div class="k">Presence</div><div class="v" id="mPresence">-</div></div>
+              <div class="metric"><div class="k">Motion Intensity</div><div class="v" id="mIntensity">-<small>%</small></div></div>
+              <div class="metric"><div class="k">Activity Level</div><div class="v" id="mActivity">-<small>%</small></div></div>
+              <div class="metric"><div class="k">Signal Quality</div><div class="v" id="mSignal">-<small>%</small></div></div>
+            </div>
+          </div>
+
+          <div class="cards">
+            <div class="card glass">
+              <div class="label">Motion Score</div>
+              <div class="value" id="cScore">0.00</div>
+              <div class="bar"><span id="cScoreBar"></span></div>
+            </div>
+            <div class="card glass">
+              <div class="label">Packet Rate</div>
+              <div class="value" id="cPps">0<small> /s</small></div>
+              <div class="foot" id="cPackets">0 total</div>
+            </div>
+            <div class="card glass">
+              <div class="label">Signal (RSSI)</div>
+              <div class="value" id="cRssi">-<small> dBm</small></div>
+              <div class="foot" id="cCsiState">no CSI</div>
+            </div>
+            <div class="card glass">
+              <div class="label">CSI Variance</div>
+              <div class="value" id="cVariance">0.000</div>
+              <div class="foot">baseline <span id="cBaseline">0.000</span></div>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="panel glass">
+              <h3>Motion Score <span class="hint">last ~2 min</span></h3>
+              <div class="chart-box"><canvas id="chartMotion"></canvas></div>
+            </div>
+            <div class="panel glass">
+              <h3>Live Telemetry</h3>
+              <div class="kv"><span class="k">Device</span><span class="v" id="iDevice">-</span></div>
+              <div class="kv"><span class="k">IP address</span><span class="v" id="iIp">-</span></div>
+              <div class="kv"><span class="k">WiFi</span><span class="v" id="iWifi">-</span></div>
+              <div class="kv"><span class="k">Channel</span><span class="v" id="iChannel">-</span></div>
+              <div class="kv"><span class="k">CSI amplitude</span><span class="v" id="iAmp">-</span></div>
+              <div class="kv"><span class="k">Free heap</span><span class="v" id="iHeap">-</span></div>
+              <div class="kv"><span class="k">Partition</span><span class="v" id="iPart">-</span></div>
+            </div>
+          </div>
+
+          <div class="panel glass" style="margin-top:18px;">
+            <h3>CSI Variance <span class="hint">signal fluctuation</span></h3>
+            <div class="chart-box" style="height:180px;"><canvas id="chartVar"></canvas></div>
+          </div>
+        </section>
+
+        <!-- ===== Logs view ===== -->
+        <section class="view" id="view-logs">
+          <div class="panel glass">
+            <h3>Event Log
+              <span>
+                <button class="btn ghost" id="logRefresh">Refresh</button>
+                <button class="btn ghost" id="logDownload">Download CSV</button>
+              </span>
+            </h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th style="width:70px;">#</th><th style="width:120px;">Uptime</th><th style="width:90px;">Level</th><th>Message</th></tr></thead>
+                <tbody id="logRows"><tr><td colspan="4" style="color:var(--text-faint);">Loading…</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== Settings view ===== -->
+        <section class="view" id="view-settings">
+          <div class="panel glass">
+            <h3>Device &amp; Network</h3>
+            <div class="form-grid">
+              <div class="field">
+                <label for="fDeviceName">Device name</label>
+                <input type="text" id="fDeviceName" maxlength="31" />
+              </div>
+              <div class="field">
+                <label for="fSsid">WiFi SSID</label>
+                <input type="text" id="fSsid" maxlength="32" placeholder="(leave blank for setup AP)" />
+              </div>
+              <div class="field">
+                <label for="fPass">WiFi password</label>
+                <input type="password" id="fPass" maxlength="64" placeholder="•••••••• (unchanged)" />
+                <span class="desc" id="fPassHint">A password is currently stored.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel glass" style="margin-top:18px;">
+            <h3>Detection <span class="hint">normalised score 0.00 - 1.00</span></h3>
+            <div class="form-grid">
+              <div class="field">
+                <label>Presence threshold <span class="mono" id="lPresence"></span></label>
+                <input type="range" id="fPresence" min="0.02" max="0.9" step="0.01" />
+                <span class="desc">Score above which a person is considered present.</span>
+              </div>
+              <div class="field">
+                <label>Motion threshold <span class="mono" id="lMotion"></span></label>
+                <input type="range" id="fMotion" min="0.05" max="0.95" step="0.01" />
+                <span class="desc">Score above which active motion is asserted.</span>
+              </div>
+              <div class="field">
+                <label>High-motion threshold <span class="mono" id="lHigh"></span></label>
+                <input type="range" id="fHigh" min="0.1" max="1.0" step="0.01" />
+                <span class="desc">Score above which vigorous motion is asserted.</span>
+              </div>
+              <div class="field">
+                <label for="fRate">Sampling rate (Hz)</label>
+                <input type="number" id="fRate" min="5" max="100" step="1" />
+                <span class="desc">Traffic-generator packet rate that drives CSI.</span>
+              </div>
+              <div class="field">
+                <label>Auto-calibration</label>
+                <div class="switch"><input type="checkbox" id="fAuto" /><span class="desc">Continuously adapt the noise baseline while idle.</span></div>
+              </div>
+              <div class="field">
+                <label>Display brightness <span class="mono" id="lBright"></span></label>
+                <input type="range" id="fBright" min="0" max="100" step="5" />
+              </div>
+            </div>
+          </div>
+
+          <div class="panel glass" style="margin-top:18px;">
+            <h3>Security</h3>
+            <div class="form-grid">
+              <div class="field">
+                <label for="fAdminUser">Admin username</label>
+                <input type="text" id="fAdminUser" maxlength="31" />
+              </div>
+              <div class="field">
+                <label for="fAdminPass">New admin password</label>
+                <input type="password" id="fAdminPass" maxlength="64" placeholder="(leave blank to keep)" />
+                <span class="desc">Minimum 6 characters.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <button class="btn primary" id="saveBtn">Save settings</button>
+            <button class="btn ghost" id="calibrateBtn">Recalibrate now</button>
+            <button class="btn warn" id="factoryBtn">Factory reset</button>
+          </div>
+        </section>
+
+        <!-- ===== System / OTA view ===== -->
+        <section class="view" id="view-system">
+          <div class="grid-2">
+            <div class="panel glass">
+              <h3>System</h3>
+              <div class="kv"><span class="k">Firmware</span><span class="v" id="sFw">-</span></div>
+              <div class="kv"><span class="k">Running partition</span><span class="v" id="sPart">-</span></div>
+              <div class="kv"><span class="k">Uptime</span><span class="v" id="sUptime">-</span></div>
+              <div class="kv"><span class="k">Free heap</span><span class="v" id="sHeap">-</span></div>
+              <div class="kv"><span class="k">Min free heap</span><span class="v" id="sHeapMin">-</span></div>
+              <div class="kv"><span class="k">Active sessions</span><span class="v" id="sSessions">-</span></div>
+              <div class="row">
+                <button class="btn warn" id="rebootBtn">Reboot device</button>
+              </div>
+            </div>
+
+            <div class="panel glass">
+              <h3>Firmware update (OTA)</h3>
+              <p class="desc" style="color:var(--text-dim); font-size:13px; margin-bottom:12px;">
+                Upload a <span class="mono">.bin</span> built with <span class="mono">idf.py build</span>
+                (<span class="mono">nexus_csi_sensor.bin</span>). The device verifies the image, reboots into
+                it, and rolls back automatically if it fails to start.
+              </p>
+              <div class="field">
+                <input type="file" id="fwFile" accept=".bin" />
+              </div>
+              <div class="progress"><span id="otaBar"></span></div>
+              <div class="desc" id="otaMsg" style="margin-top:8px;">No update in progress.</div>
+              <div class="row">
+                <button class="btn primary" id="otaBtn" disabled>Upload &amp; flash</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+  <div id="toasts"></div>
+  <script src="/js/app.js"></script>
+</body>
+</html>

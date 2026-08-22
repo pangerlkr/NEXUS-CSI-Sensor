@@ -1,0 +1,157 @@
+name: Bug report
+description: Something is broken, crashing, or behaving differently than documented.
+title: "[Bug] "
+labels: ["bug", "needs triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file this properly. A good bug report is
+        the difference between a fix this week and a fix eventually.
+
+        **Two quick checks first:**
+
+        - Detection accuracy problems (false presence, missed people, twitchy
+          state changes) are usually tuning, not bugs. Use the
+        **Detection tuning** template instead, and skim
+          [docs/CALIBRATION.md](../blob/main/docs/CALIBRATION.md).
+        - Found a security vulnerability? Please do **not** file it here. Follow
+          [SECURITY.md](../blob/main/SECURITY.md) so users get a fix before an
+          exploit gets an audience.
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Before filing
+      options:
+        - label: I checked [docs/TROUBLESHOOTING.md](../blob/main/docs/TROUBLESHOOTING.md) and my symptom is not listed, or the fix there did not work.
+          required: true
+        - label: I searched existing issues, including closed ones.
+          required: true
+
+  - type: textarea
+    id: what-happens
+    attributes:
+      label: What happens
+      description: The actual behaviour. Plainly, as if describing it to someone standing next to the board.
+      placeholder: |
+        After about ten minutes the dashboard stops updating. The page still
+        loads, the state card just freezes on whatever it last said. Reloading
+        fixes it for another ten minutes.
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-expected
+    attributes:
+      label: What you expected instead
+      description: If the docs say it should do something else, quote or link the line. That is useful either way, because either the code is wrong or the docs are.
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Numbered, from a known starting point. If it only happens sometimes, say roughly how often.
+      placeholder: |
+        1. Fresh flash, `idf.py erase-flash flash`
+        2. Provision onto 2.4 GHz WiFi
+        3. Log in, leave the dashboard tab open and untouched
+        4. Wait ~10 minutes
+        5. Values stop changing (happens maybe 4 times out of 5)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part of the system
+      description: Best guess is fine. Pick "not sure" if you would only be guessing.
+      options:
+        - Build / toolchain
+        - Flashing
+        - WiFi / provisioning
+        - Login / sessions / auth
+        - Dashboard (web UI)
+        - REST API or WebSocket
+        - CSI capture
+        - Detection engine
+        - Display (ST7735)
+        - OTA update
+        - Storage / configuration persistence
+        - Stability (reboots, watchdog, memory)
+        - Documentation
+        - Not sure
+    validations:
+      required: true
+
+  - type: input
+    id: fw-version
+    attributes:
+      label: Firmware version
+      description: Bottom of the dashboard, the System tab, or `NEXUS_FW_VERSION` in `app_config.h`. If you built from source, the commit hash is better.
+      placeholder: "1.0.0, or commit a1b2c3d"
+    validations:
+      required: true
+
+  - type: input
+    id: idf-version
+    attributes:
+      label: ESP-IDF version
+      description: Output of `idf.py --version`. Write "prebuilt binary" if you did not build it yourself.
+      placeholder: "ESP-IDF v5.2.2"
+    validations:
+      required: true
+
+  - type: input
+    id: board
+    attributes:
+      label: Board
+      description: Exact module and dev board if you know it. Flash size matters.
+      placeholder: "ESP32-WROOM-32, DevKitC v4, 4 MB flash"
+    validations:
+      required: true
+
+  - type: input
+    id: host
+    attributes:
+      label: Host OS, and browser if this is a dashboard issue
+      placeholder: "macOS 14.5, Firefox 128"
+    validations:
+      required: false
+
+  - type: textarea
+    id: serial-log
+    attributes:
+      label: Serial log
+      description: |
+        The single most useful thing you can attach. Run `idf.py monitor`, reproduce
+        the problem, and paste from boot through the failure. If it crashed, include
+        the whole backtrace: the decoded one from the monitor is much more useful
+        than raw addresses.
+
+        Redact your WiFi SSID and password if they appear.
+      render: shell
+      placeholder: |
+        I (312) nexus: NEXUS-CSI-Sensor 1.0.0 starting
+        ...
+    validations:
+      required: false
+
+  - type: textarea
+    id: config
+    attributes:
+      label: Non-default configuration
+      description: Thresholds, sampling rate, feature toggles you changed, display connected or not. `GET /api/config` gives you all of it at once.
+      render: json
+    validations:
+      required: false
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else
+      description: Screenshots, when it started happening, what you already tried and ruled out, whether a second board behaves the same way.
+    validations:
+      required: false

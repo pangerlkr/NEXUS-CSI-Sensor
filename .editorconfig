@@ -1,0 +1,40 @@
+# EditorConfig helps keep indentation and whitespace consistent across editors.
+# Docs: https://editorconfig.org
+root = true
+
+# Defaults for every file
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+
+# Firmware C sources: 4-space indent (matches .clang-format)
+[*.{c,h}]
+indent_size = 4
+
+# Web assets: 2-space indent
+[*.{js,css,html}]
+indent_size = 2
+
+# Data and config files: 2-space indent
+[*.{json,yml,yaml}]
+indent_size = 2
+
+# CMake build files: 4-space indent
+[{CMakeLists.txt,*.cmake}]
+indent_size = 4
+
+# Markdown: keep trailing whitespace, because two trailing spaces mean a hard
+# line break in Markdown.
+[*.md]
+trim_trailing_whitespace = false
+
+# Partition tables and other CSV data are column-aligned by hand.
+[*.csv]
+trim_trailing_whitespace = false
+
+# Makefiles require real tabs.
+[Makefile]
+indent_style = tab

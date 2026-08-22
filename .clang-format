@@ -1,0 +1,39 @@
+# clang-format configuration for the NEXUS CSI Sensor firmware.
+#
+# This encodes the house style already used across firmware/: 4-space indent,
+# no tabs, pointers bound to the name (char *p), functions open their brace on
+# the next line while control statements keep it on the same line, and include
+# groups are preserved rather than reordered.
+#
+# Format the files you touch before committing:
+#   clang-format -i firmware/main/*.c firmware/main/*.h
+---
+Language: Cpp
+BasedOnStyle: LLVM
+
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 100
+
+BreakBeforeBraces: Linux
+PointerAlignment: Right
+DerivePointerAlignment: false
+
+AlignAfterOpenBracket: Align
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
+IndentCaseLabels: false
+
+KeepEmptyLinesAtTheStartOfBlocks: false
+MaxEmptyLinesToKeep: 1
+SpaceAfterCStyleCast: true
+SpacesBeforeTrailingComments: 1
+ReflowComments: true
+
+# Include order in this project is semantic (system, FreeRTOS, esp_*, then app
+# headers), so do not let the formatter reorder it.
+SortIncludes: false
+IncludeBlocks: Preserve

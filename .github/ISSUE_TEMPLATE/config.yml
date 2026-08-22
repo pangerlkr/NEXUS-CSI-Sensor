@@ -1,0 +1,35 @@
+# Issue template configuration.
+#
+# blank_issues_enabled is false on purpose: the templates ask for the serial log,
+# the board revision, and the room layout, which are the three things we would
+# otherwise have to ask for in a follow-up comment every single time. If none of
+# the templates fit, use the Q&A link below.
+
+blank_issues_enabled: false
+
+contact_links:
+  - name: Question, or not sure it is a bug
+    url: https://github.com/nexus-sensing/NEXUS-CSI-Sensor/discussions
+    about: >
+      Setup help, "is this normal", "should it be able to do X", and general CSI
+      sensing questions. Discussions is a better home for these than the issue
+      tracker, and answers there stay findable for the next person.
+
+  - name: Troubleshooting guide
+    url: https://github.com/nexus-sensing/NEXUS-CSI-Sensor/blob/main/docs/TROUBLESHOOTING.md
+    about: >
+      Symptom, cause, fix, organised by where things go wrong: build, flash,
+      provisioning, login, detection quality, display, stability. Worth a look
+      before filing, it covers most first-run problems.
+
+  - name: Report a security vulnerability
+    url: https://github.com/nexus-sensing/NEXUS-CSI-Sensor/blob/main/SECURITY.md
+    about: >
+      Please do not open a public issue for a vulnerability. SECURITY.md explains
+      how to report it privately so users get a fix before an exploit gets an
+      audience. Security research is welcome and credited.
+
+  - name: Code of Conduct
+    url: https://github.com/nexus-sensing/NEXUS-CSI-Sensor/blob/main/CODE_OF_CONDUCT.md
+    about: >
+      What we expect of each other here, and how to report a problem privately.

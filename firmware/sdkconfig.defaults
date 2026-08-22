@@ -1,0 +1,68 @@
+#
+# NEXUS CSI Sensor - default sdkconfig
+#
+# These values are applied on a clean build. Run `idf.py menuconfig` to tune
+# further; user-facing runtime options are stored in NVS instead of here.
+#
+
+# ---- Target ---------------------------------------------------------------
+CONFIG_IDF_TARGET="esp32"
+
+# ---- Flash / partition table ---------------------------------------------
+CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y
+CONFIG_ESPTOOLPY_FLASHSIZE="4MB"
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
+CONFIG_PARTITION_TABLE_FILENAME="partitions.csv"
+
+# ---- WiFi CSI (the whole point of this project) ---------------------------
+# Enable Channel State Information capture in the WiFi driver.
+CONFIG_ESP_WIFI_CSI_ENABLED=y
+# Static RX buffers give more deterministic CSI delivery.
+CONFIG_ESP_WIFI_STATIC_RX_BUFFER_NUM=16
+CONFIG_ESP_WIFI_DYNAMIC_RX_BUFFER_NUM=32
+CONFIG_ESP_WIFI_AMPDU_RX_ENABLED=y
+
+# ---- HTTP server + WebSocket ---------------------------------------------
+CONFIG_HTTPD_WS_SUPPORT=y
+CONFIG_HTTPD_MAX_REQ_HDR_LEN=1024
+CONFIG_HTTPD_MAX_URI_LEN=512
+
+# ---- OTA ------------------------------------------------------------------
+CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y
+CONFIG_APP_ANTI_ROLLBACK=n
+
+# ---- Task Watchdog --------------------------------------------------------
+CONFIG_ESP_TASK_WDT_EN=y
+CONFIG_ESP_TASK_WDT_INIT=y
+CONFIG_ESP_TASK_WDT_TIMEOUT_S=10
+# Panic (and thus reboot) if a subscribed task or an idle task stalls: this is
+# the automatic-recovery mechanism.
+CONFIG_ESP_TASK_WDT_PANIC=y
+CONFIG_ESP_TASK_WDT_CHECK_IDLE_TASK_CPU0=y
+CONFIG_ESP_TASK_WDT_CHECK_IDLE_TASK_CPU1=y
+CONFIG_ESP_INT_WDT=y
+# Reboot automatically on any panic instead of halting in the monitor.
+CONFIG_ESP_SYSTEM_PANIC_PRINT_REBOOT=y
+
+# ---- FreeRTOS -------------------------------------------------------------
+CONFIG_FREERTOS_HZ=1000
+CONFIG_FREERTOS_USE_TRACE_FACILITY=y
+
+# ---- Main task stack ------------------------------------------------------
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=6144
+
+# ---- Logging --------------------------------------------------------------
+CONFIG_LOG_DEFAULT_LEVEL_INFO=y
+CONFIG_LOG_MAXIMUM_LEVEL_DEBUG=y
+
+# ---- mbedTLS (used for SHA-256 password hashing) --------------------------
+CONFIG_MBEDTLS_HARDWARE_SHA=y
+
+# ---- Power / performance --------------------------------------------------
+CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240=y
+CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ=240
+
+# ---- Compiler -------------------------------------------------------------
+CONFIG_COMPILER_OPTIMIZATION_PERF=y
+CONFIG_COMPILER_WARN_WRITE_STRINGS=y

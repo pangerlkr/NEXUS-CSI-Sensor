@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#070b16" />
+  <title>NEXUS CSI Sensor - Sign in</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="login-wrap">
+    <div class="login-card glass">
+      <div class="brand">
+        <div class="logo">N</div>
+        <div class="name">NEXUS<small>CSI SENSOR</small></div>
+      </div>
+      <p class="login-sub">WiFi CSI presence &amp; motion detection</p>
+
+      <form id="login" autocomplete="on">
+        <div class="field">
+          <label for="user">Username</label>
+          <input type="text" id="user" name="user" autocomplete="username"
+                 value="admin" required autofocus />
+        </div>
+        <div class="field" style="margin-top:14px;">
+          <label for="pass">Password</label>
+          <input type="password" id="pass" name="pass"
+                 autocomplete="current-password" required />
+        </div>
+        <div class="err-msg" id="err" role="alert"></div>
+        <button class="btn primary" type="submit" style="width:100%;">Sign in</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+      const form = document.getElementById("login");
+      const err = document.getElementById("err");
+      const btn = form.querySelector("button");
+
+      // If a valid session already exists, skip the form.
+      fetch("/api/session", { credentials: "same-origin" })
+        .then((r) => { if (r.ok) location.replace("/"); })
+        .catch(() => {});
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        err.textContent = "";
+        btn.disabled = true;
+        btn.textContent = "Signing in…";
+        try {
+          const r = await fetch("/api/login", {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              user: document.getElementById("user").value,
+              pass: document.getElementById("pass").value,
+            }),
+          });
+          const j = await r.json().catch(() => ({}));
+          if (r.ok && j.ok) {
+            location.replace("/");
+            return;
+          }
+          err.textContent = j.message || "Invalid credentials.";
+        } catch (_) {
+          err.textContent = "Network error - is the device reachable?";
+        }
+        btn.disabled = false;
+        btn.textContent = "Sign in";
+      });
+    })();
+  </script>
+</body>
+</html>

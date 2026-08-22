@@ -1,0 +1,156 @@
+name: Detection tuning help
+description: False presence, missed people, or twitchy state changes. Usually tuning rather than a bug.
+title: "[Tuning] "
+labels: ["detection", "question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        CSI sensing is genuinely room-dependent. The same thresholds that work in
+        a small carpeted bedroom can misbehave in an open-plan office with a
+        ceiling fan. So this is the most common kind of issue, and it is almost
+        always solvable with placement and threshold work rather than a code
+        change.
+
+        Please work through [docs/CALIBRATION.md](../blob/main/docs/CALIBRATION.md)
+        first, particularly the placement section. Then fill this in and we will
+        help you tune it. If it turns out to be a real defect we will relabel it.
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Before filing
+      options:
+        - label: I ran the calibration procedure in docs/CALIBRATION.md with the room empty.
+          required: true
+        - label: I did a walk test afterwards and the behaviour below is what I saw.
+          required: true
+
+  - type: dropdown
+    id: symptom
+    attributes:
+      label: Main symptom
+      options:
+        - "False presence: says occupied when the room is empty"
+        - "Misses people: says empty when someone is there"
+        - Slow to detect someone entering
+        - Slow to clear after someone leaves
+        - "Twitchy: flips between states rapidly"
+        - Motion state never reaches Motion or High Motion
+        - Motion state trips on tiny movements
+        - Score sits pinned at 0.00 or at 1.00
+        - Something else
+    validations:
+      required: true
+
+  - type: textarea
+    id: detail
+    attributes:
+      label: What you observe
+      description: Include numbers. "The score sits around 0.20 in an empty room and only reaches 0.35 when I walk past" is far more actionable than "it is too sensitive".
+      placeholder: |
+        Empty room, score hovers 0.15-0.22 and presence stays asserted. When I
+        walk through it goes to about 0.55. So there is a real signal, the empty
+        baseline is just sitting above my presence threshold of 0.12.
+    validations:
+      required: true
+
+  - type: textarea
+    id: thresholds
+    attributes:
+      label: Your current thresholds and sampling rate
+      description: From the dashboard Settings tab, or `GET /api/config`.
+      render: json
+      placeholder: |
+        {
+          "presence_threshold": 0.12,
+          "motion_threshold": 0.35,
+          "high_motion_threshold": 0.70,
+          "sampling_rate": 20
+        }
+    validations:
+      required: true
+
+  - type: textarea
+    id: room
+    attributes:
+      label: The room and the placement
+      description: |
+        This matters more than any threshold. Please cover:
+
+        - Room size, roughly, and what is in it (furniture, metal shelving, glass).
+        - Where the sensor is: height, what it is sitting on or attached to, whether
+          it is against a wall or in a corner.
+        - Where the router is relative to the sensor, and roughly how far.
+        - Whether the sensor and router have line of sight or a wall between them.
+        - Where people actually walk relative to that line.
+      placeholder: |
+        4 x 5 m living room, sofa and a TV. Sensor on a bookshelf about 1.4 m up,
+        against the long wall. Router is in the hallway, roughly 7 m away, one
+        plasterboard wall between. The doorway people use crosses that line.
+    validations:
+      required: true
+
+  - type: textarea
+    id: interference
+    attributes:
+      label: Anything else moving or radiating nearby
+      description: |
+        The usual culprits behind a restless empty-room baseline: a ceiling or
+        pedestal fan, an air conditioner or heat pump, curtains near a draught, a
+        pet, a fish tank pump, a washing machine, a microwave, a busy 2.4 GHz band
+        with many neighbouring networks, or another room's occupants on the far
+        side of a thin wall.
+      placeholder: "Ceiling fan on low most of the day. Cat."
+    validations:
+      required: false
+
+  - type: input
+    id: packet-rate
+    attributes:
+      label: Packet rate shown on the dashboard
+      description: The CSI card shows packets per second. If it is 0 or wildly below your sampling rate, that is a capture problem rather than a tuning one, and the bug template is the right place.
+      placeholder: "about 19 per second"
+    validations:
+      required: true
+
+  - type: input
+    id: rssi
+    attributes:
+      label: RSSI and signal quality
+      description: Also on the dashboard. Very weak signal (below about -80 dBm) makes everything downstream noisy.
+      placeholder: "-63 dBm, 68 %"
+    validations:
+      required: true
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: What you have already tried
+      description: Threshold values you tested and what each one did, other placements, re-running calibration, a different sampling rate. Saves us suggesting things you have ruled out.
+    validations:
+      required: false
+
+  - type: input
+    id: fw-version
+    attributes:
+      label: Firmware version
+      placeholder: "1.0.0, or commit a1b2c3d"
+    validations:
+      required: true
+
+  - type: input
+    id: board
+    attributes:
+      label: Board
+      placeholder: "ESP32-WROOM-32 DevKitC"
+    validations:
+      required: true
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else
+      description: A screenshot of the detection chart over a few minutes is very useful, especially one that spans both an empty period and an occupied one.
+    validations:
+      required: false

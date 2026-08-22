@@ -1,0 +1,32 @@
+# ---- ESP-IDF build output ------------------------------------------------
+build/
+firmware/build/
+firmware/test/build/
+sdkconfig
+sdkconfig.old
+sdkconfig.ci
+*.bin
+*.elf
+*.map
+
+# Keep the checked-in defaults, ignore the generated per-build config only.
+!sdkconfig.defaults
+!sdkconfig.defaults.*
+
+# ---- ESP-IDF / tooling ----------------------------------------------------
+managed_components/
+dependencies.lock
+*.pyc
+__pycache__/
+.cache/
+compile_commands.json
+
+# ---- Editors / OS ---------------------------------------------------------
+.vscode/
+.idea/
+.DS_Store
+*.swp
+*~
+
+# ---- Release artifacts (built binaries are attached to GitHub Releases) ---
+releases/*.bin

@@ -1,0 +1,122 @@
+name: Feature request
+description: Suggest something the firmware, dashboard, or docs should do and currently does not.
+title: "[Feature] "
+labels: ["enhancement", "needs triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ideas are welcome, including ambitious ones. The most persuasive requests
+        describe a problem you actually hit, not just a feature you would like to
+        see. That gives us room to solve it in a way that fits the rest of the
+        system.
+
+        Worth a look first: the roadmap in the
+        [README](../blob/main/README.md#roadmap) and the future-ready notes in
+        [docs/ARCHITECTURE.md](../blob/main/docs/ARCHITECTURE.md#11-future-ready-architecture).
+        Some of this may already be planned.
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Before filing
+      options:
+        - label: I searched existing issues and the roadmap, and this is not already tracked.
+          required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What are you trying to do that is hard or impossible right now? Concrete beats abstract.
+      placeholder: |
+        I have three of these in one flat and I want a single view of which rooms
+        are occupied. Right now that means keeping three dashboard tabs open and
+        reading them side by side.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you would like it to do
+      description: Your proposed solution. Rough is fine. If you have thought about the interface (a config key, an endpoint, a dashboard control), sketch it.
+      placeholder: |
+        Publish state changes over MQTT so a broker can aggregate them. Something
+        like a `mqtt_host` / `mqtt_port` / `mqtt_topic` block in the config, and a
+        JSON payload on the topic whenever the state changes.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you considered
+      description: Including anything you tried and rejected, and why. If polling `/api/state` from a script already works but is unsatisfying, say what is unsatisfying about it.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part of the system
+      options:
+        - Detection / signal processing
+        - CSI capture
+        - Dashboard (web UI)
+        - REST API or WebSocket
+        - Integrations (MQTT, Home Assistant, webhooks)
+        - Provisioning / networking
+        - Security / auth
+        - Display (ST7735)
+        - OTA / releases
+        - Build system, tests, or CI
+        - Documentation
+        - Something else
+    validations:
+      required: true
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: How big do you think this is
+      description: A guess is fine and will not be held against you. It helps us know whether you have already thought about cost.
+      options:
+        - Small, probably contained in one module
+        - Medium, touches a few modules
+        - Large, needs a design discussion first
+        - No idea
+    validations:
+      required: false
+
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Constraints you are aware of
+      description: |
+        This runs on a single ESP32 with a few hundred KB of usable RAM, a 4 MB
+        flash split between two OTA slots, and a watchdog that does not forgive
+        long blocking work. If your idea has a memory, flash, or timing cost you
+        have already thought about, this is the place to say so.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: help
+    attributes:
+      label: Would you be up for implementing it
+      description: Not required in the slightest. It changes how we respond, that is all.
+      options:
+        - "Yes, I would like to open a PR"
+        - "Maybe, with some guidance on where to start"
+        - "No, just suggesting it"
+    validations:
+      required: true
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else
+      description: Links to relevant papers or projects, mockups, prior art in other CSI sensing work.
+    validations:
+      required: false
